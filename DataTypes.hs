@@ -2,8 +2,6 @@ module DataTypes where
 
 import Prelude
 
-data 
-
 data Primitive = PrimitiveBoolean Bool | PrimitiveNumber Integer
 
 data Boolean = Boolean Bool |
