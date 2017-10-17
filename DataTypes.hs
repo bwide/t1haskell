@@ -15,13 +15,13 @@ data BooleanExpression =
     | Or BooleanExpression BooleanExpression 
     | Not BooleanExpression deriving (Eq, Show)
 
-data Value = Integer | Bool 
+data Value = Integer Integer | Bool Bool
 
 data Expression = 
     Nil
     | Atrib Bool String
     | Seq Expression Expression
-    | Esc Expression Expression
+    | If BooleanExpression Expression Expression
     | LoopPre BooleanExpression Expression
     | LoopPost Expression BooleanExpression deriving (Show)
 
@@ -32,11 +32,18 @@ calculateBool (Or x y) = (calculateBool x) || (calculateBool y )
 calculateBool (Not x) = not (calculateBool x)
 
 calculate::ArithmeticExpression -> Value
-calculate (Number x) = x
-calculate (x :+: y) = (calculate x) + (calculate y)
-calculate (x :*: y) = (calculate x) * (calculate y)
--- calculate (x :<: y) = BooleanValue (calculate x) < (calculate y)
--- calculate (x :>: y) = BooleanValue (calculate x) > (calculate y)
+calculate (Number x) = Integer x
+calculate (x :+: y) = Integer (x1 + x2)
+    where 
+        (Integer x1) = calculate x
+        (Integer x2) = calculate y
+calculate (x :*: y) = Integer (x1 * x2)
+    where 
+        (Integer x1) = calculate x
+        (Integer x2) = calculate y
+
+        
+
 
 calculateExpression::Expression -> ()
 calculateExpression Nil = ()
