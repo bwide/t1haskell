@@ -3,7 +3,8 @@ module DataTypes where
 import Prelude
 
 data ArithmeticExpression = 
-    Number Integer 
+    Number Integer
+    | BooleanValue Bool 
     | ArithmeticExpression :+: ArithmeticExpression 
     | ArithmeticExpression :*: ArithmeticExpression 
     | ArithmeticExpression :>: ArithmeticExpression
@@ -33,6 +34,7 @@ calculateBool (Not x) = not (calculateBool x)
 
 calculate::ArithmeticExpression -> Value
 calculate (Number x) = Integer x
+calculate (BooleanValue x) =  Bool x
 calculate (x :+: y) = Integer (x1 + x2)
     where 
         (Integer x1) = calculate x
@@ -41,8 +43,11 @@ calculate (x :*: y) = Integer (x1 * x2)
     where 
         (Integer x1) = calculate x
         (Integer x2) = calculate y
+calculate (x :>: y) = Bool (x1 > y1)
+    where
+        (Bool x1) = calculate x
+        (Bool y1) = calculate y
 
-        
 
 
 calculateExpression::Expression -> ()
