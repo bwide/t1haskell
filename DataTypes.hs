@@ -29,7 +29,7 @@ calculateBool::BooleanExpression -> Bool
 calculateBool (Boolean x) = x
 calculateBool (And x y) = (calculateBool x) && (calculateBool y )
 calculateBool (Or x y) = (calculateBool x) || (calculateBool y )
-calculateBool (Not x) = (calculateBool x)
+calculateBool (Not x) = not (calculateBool x)
 
 calculate::ArithmeticExpression -> Value
 calculate (Number x) = x
