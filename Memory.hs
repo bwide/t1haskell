@@ -4,11 +4,10 @@ module Memory
    value, 
    update ) where
 
-import DataTypes
+import Prelude
+import Primitives
 
--- Var is the type of variables.                    
-
-type Var = Valor
+type Var = Value
 
 newtype Store = Store (Var -> Integer)      
 
