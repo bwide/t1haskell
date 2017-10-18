@@ -1,21 +1,33 @@
-module Memory 
-  ( Store, 
-   initial, 
-   value, 
-   update ) where
+module Memory
+( Store, 
+  initial,     -- Store
+  value,       -- Store -> Var -> Integer
+  update       -- Store -> Var -> Integer -> Store
+ ) where
 
-import Prelude
 import Primitives
 
 type Var = Value
 
-newtype Store = Store (Var -> Integer)      
+-- The implementation is given by a newtype declaration, with one
+-- constructor, taking an argument of type [ (String,Var) ].
 
-initial :: Store 
-initial = Store (\v -> 0)
+data Store = Store [ (String, Var) ] deriving (Show, Eq)
 
-value :: Store -> Var -> Integer
-value (Store sto) v = sto v
+-- instance Eq Store where 
+-- (Store sto1) == (Store sto2) = (sto1 == sto2)                 
 
-update  :: Store -> Var -> Integer -> Store
-update (Store sto) v n = Store (\w -> if v==w then n else sto w)
+-- instance Show Store where
+-- show (Store sto) = show sto                 
+--  
+initial :: Store
+initial = Store []
+
+value  :: Store -> String -> Var
+value (Store []) v         = Null
+value (Store ((string, var):sto)) v 
+  | v==string            = var
+  | otherwise       = value (Store sto) v
+
+update  :: Store -> Var -> String -> Store
+update (Store sto) v n = Store ((n,v):sto)

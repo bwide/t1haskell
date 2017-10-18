@@ -13,11 +13,11 @@ data BooleanExpression =
     | Or BooleanExpression BooleanExpression 
     | Not BooleanExpression deriving (Eq, Show)
 
-data Value = Integer Integer | Bool Bool deriving (Eq, Show)
+data Value = Integer Integer | Bool Bool | Null deriving (Eq, Show)
 
 data Expression = 
     Nil
-    | Atrib Bool String
+    | Atrib String Value
     | Seq Expression Expression
     | If BooleanExpression Expression Expression
     | LoopPre BooleanExpression Expression

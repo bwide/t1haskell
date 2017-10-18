@@ -17,5 +17,18 @@ calculate (x :+: y) = (calculate x) + (calculate y)
 calculate (x :*: y) = (calculate x) * (calculate y)
 
 
-calculateExpression::Expression -> Store -> ()
-calculateExpression Nil store = ()
+calculateExpression::Expression -> Store -> Store
+calculateExpression Nil store = store
+calculateExpression (Atrib string value) store = (update store value string)
+calculateExpression (Seq cmd1 cmd2) store = calculateExpression cmd1 (calculateExpression cmd2 store)
+calculateExpression (If boolExp cmd1 cmd2) store
+    | calculateBool boolExp = calculateExpression cmd1 store
+    | otherwise = calculateExpression cmd2 store
+calculateExpression (LoopPre boolExp cmd) store
+    | calculateBool boolExp = (calculateExpression (Seq cmd (LoopPre boolExp cmd)) store)
+    | otherwise = calculateExpression Nil store
+calculateExpression (LoopPost cmd boolExp) store = (calculateExpression (Seq cmd cmd2) store) where
+    cmd2
+        | calculateBool boolExp = (LoopPost cmd boolExp)
+        | otherwise = Nil
+            
