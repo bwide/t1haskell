@@ -17,18 +17,20 @@ calculate (x :+: y) = (calculate x) + (calculate y)
 calculate (x :*: y) = (calculate x) * (calculate y)
 
 
-calculateExpression::Expression -> Store -> Store
-calculateExpression Nil store = store
-calculateExpression (Atrib string value) store = (update store value string)
-calculateExpression (Seq cmd1 cmd2) store = calculateExpression cmd1 (calculateExpression cmd2 store)
-calculateExpression (If boolExp cmd1 cmd2) store
-    | calculateBool boolExp = calculateExpression cmd1 store
-    | otherwise = calculateExpression cmd2 store
-calculateExpression (LoopPre boolExp cmd) store
-    | calculateBool boolExp = (calculateExpression (Seq cmd (LoopPre boolExp cmd)) store)
-    | otherwise = calculateExpression Nil store
-calculateExpression (LoopPost cmd boolExp) store = (calculateExpression (Seq cmd cmd2) store) where
+calc::Expression -> Store -> Store
+calc Nil store = store
+calc (Atrib string value) store = (update store value string)
+calc (Seq cmd1 cmd2) store = calc cmd1 (calc cmd2 store)
+calc (If boolExp cmd1 cmd2) store
+    | calculateBool boolExp = calc cmd1 store
+    | otherwise = calc cmd2 store
+calc (LoopPre boolExp cmd) store
+    | calculateBool boolExp = (calc (Seq cmd (LoopPre boolExp cmd)) store)
+    | otherwise = calc Nil store
+calc (LoopPost cmd boolExp) store = (calc (Seq cmd cmd2) store) where
     cmd2
         | calculateBool boolExp = (LoopPost cmd boolExp)
         | otherwise = Nil
-            
+
+integerOf :: Value -> Integer
+integerOf (Integer x) = x
