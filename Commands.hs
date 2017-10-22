@@ -30,7 +30,7 @@ calc (LoopPre boolExp cmd) store
 calc (LoopPost cmd boolExp) store = (calc (Seq cmd cmd2) store) where
     cmd2
         | calculateBool boolExp = (LoopPost cmd boolExp)
-        | otherwise = Nil
+        | otherwise = calc Nil store
 
 integerOf :: Value -> Integer
 integerOf (Integer x) = x

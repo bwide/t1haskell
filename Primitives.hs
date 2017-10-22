@@ -18,6 +18,7 @@ data Value = Integer Integer | Bool Bool | Null deriving (Eq, Show)
 data Expression = 
     Nil
     | Atrib String Value
+    | Get String
     | Seq Expression Expression
     | If BooleanExpression Expression Expression
     | LoopPre BooleanExpression Expression
