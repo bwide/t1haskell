@@ -30,4 +30,11 @@ value (Store ((string, var):sto)) v
   | otherwise       = value (Store sto) v
 
 update  :: Store -> Var -> String -> Store
-update (Store sto) v n = Store ((n,v):sto)
+-- update (Store sto) v n = Store ((n,v):sto)
+update (Store []) var string = (Store [(string, var)])
+update (Store ((str, v):sto)) var string
+  | str==string     = (Store ((str, var):sto))
+  | otherwise       = sumStore (Store [(str, v)]) (update (Store sto) var string)
+
+sumStore:: Store -> Store -> Store
+sumStore (Store x) (Store y) = Store (x ++ y)
