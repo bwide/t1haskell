@@ -20,7 +20,7 @@ calculate (x :*: y) = (calculate x) * (calculate y)
 calc::Expression -> Store -> Store
 calc Nil store = store
 calc (Atrib string value) store = (update store value string)
-calc (Seq cmd1 cmd2) store = calc cmd1 (calc cmd2 store)
+calc (Seq cmd1 cmd2) store = calc cmd2 (calc cmd1 store)
 calc (If boolExp cmd1 cmd2) store
     | calculateBool boolExp = calc cmd1 store
     | otherwise = calc cmd2 store
@@ -30,7 +30,9 @@ calc (LoopPre boolExp cmd) store
 calc (LoopPost cmd boolExp) store = (calc (Seq cmd cmd2) store) where
     cmd2
         | calculateBool boolExp = (LoopPost cmd boolExp)
-        | otherwise = calc Nil store
+        | otherwise = Nil
+
+
 
 integerOf :: Value -> Integer
 integerOf (Integer x) = x
