@@ -4,6 +4,8 @@ import Prelude
 import Memory
 import Primitives
 
+store = initial
+
 calculateBool::BooleanExpression -> Bool
 calculateBool (Boolean x) = x
 calculateBool (And x y) = (calculateBool x) && (calculateBool y )
@@ -32,7 +34,18 @@ calc (LoopPost cmd boolExp) store = (calc (Seq cmd cmd2) store) where
         | calculateBool boolExp = (LoopPost cmd boolExp)
         | otherwise = Nil
 
+get::String -> Value
+get x = value store x
 
+getI::String -> ArithmeticExpression
+getI x = Number (integerOf (value store x))
 
 integerOf :: Value -> Integer
 integerOf (Integer x) = x
+integerOf (Bool x) = 0
+integerOf (Null) = 0
+
+boolOf :: Value -> Maybe Bool
+boolOf (Bool x) = Just x
+boolOf (Integer x) = Nothing
+boolOf (Null) = Nothing

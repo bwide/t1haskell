@@ -3,7 +3,7 @@ module Primitives where
 data ArithmeticExpression = 
     Number Integer
     | ArithmeticExpression :+: ArithmeticExpression 
-    | ArithmeticExpression :*: ArithmeticExpression  deriving (Eq, Show)
+    | ArithmeticExpression :*: ArithmeticExpression deriving (Eq, Show)
 
 data BooleanExpression = 
     Boolean Bool 

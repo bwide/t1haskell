@@ -4,29 +4,79 @@ import ParserSt
 import Commands
 import Primitives
 
-boolParser::Parser Value
-boolParser = (symbol "True" >=> \_ -> returnP (Bool True)) +++
-    ((symbol "False" >=> \_ -> returnP (Bool False))) -- or expressions
+boolParser::Parser BooleanExpression
+boolParser = 
+    (symbol "(" >=> \_ -> boolParser >=> \b1 -> symbol "||" >=> \_ -> boolParser >=> \b2 -> symbol ")" >=> \_ -> returnP (Or b1 b2)) +++
+    (symbol "(" >=> \_ -> boolParser >=> \b1 -> symbol "," >=> \_ -> boolParser >=> \b2 -> symbol ")" >=> \_ -> returnP (And b1 b2)) +++
+    (symbol "!" >=> \_ -> boolParser >=> \b -> returnP (Not b)) +++
+    (symbol "True" >=> \_ -> returnP (Boolean True)) +++
+    ((symbol "False" >=> \_ -> returnP (Boolean False)))
 
 -- do one of the above for numbers
-aritParser::Parser Value
-aritParser = parInteger >=> \int -> returnP (Integer (toInteger int)) -- or expressions
+aritParser::Parser ArithmeticExpression
+aritParser = 
+    ( parInteger >=> \int -> symbol "-" >=> \_ -> parInteger >=> \int1 -> returnP ( (Number (toInteger int)) :+: (Number (toInteger (-int1))) ) ) +++
+    ( parInteger >=> \int -> symbol "*" >=> \_ -> parInteger >=> \int1 -> returnP ( (Number (toInteger int)) :*: (Number (toInteger int1)) ) ) +++
+    ( parInteger >=> \int -> symbol "+" >=> \_ -> parInteger >=> \int1 -> returnP ( (Number (toInteger int)) :+: (Number (toInteger int1)) ) ) +++
+    (parInteger >=> \int -> returnP (Number (toInteger int))) -- or expressions
 
--- valueParser::Parser Value
--- valueParser = 
-
-atribParser::Parser (String, Value)
+atribParser::Parser Expression
 atribParser = (many alphaNum) >=>
      \var -> (symbol ":=") >=>
-     \_ -> boolParser >=>
-     \val -> returnP (var, val)
+     \_ -> aritOrBool >=>
+     \val -> returnP (Atrib var val)
+
+seqParser::Parser Expression
+seqParser = 
+    atribParser >=>
+    \cmd1 -> (symbol ";") >=>
+    \_ -> atribParser >=>
+    \cmd2 -> returnP (Seq cmd1 cmd2)
+
+ifParser::Parser Expression
+ifParser = 
+    (symbol "if") >=> \_ -> symbol "(" >=> \_ -> boolParser >=>
+    \bool -> symbol ")" >=> \_ -> 
+    (symbol "{") >=> \_ -> 
+    atribParser >=> \cmd ->
+    (symbol "}") >=> \_ -> 
+    ((symbol "else") >=> \_ -> 
+    (symbol "{") >=> \_ -> 
+    atribParser >=> \cmd1 ->
+    (symbol "}") >=> \_ -> (returnP (If bool cmd cmd1))) +++ 
+    (symbol "" >=> \_ -> returnP (If bool cmd Nil))
+
+-- loops 
+preLoopParser::Parser Expression
+preLoopParser = 
+    (symbol "while") >=> \_ -> symbol "(" >=> \_ -> boolParser >=>
+    \bool -> symbol ")" >=> \_ -> 
+    (symbol "{") >=> \_ -> 
+    atribParser >=> \cmd ->
+    (symbol "}") >=> \_ -> returnP (LoopPre bool cmd)
+
+postLoopParser::Parser Expression
+postLoopParser = 
+    (symbol "do") >=> \_ -> (symbol "{") >=> \_ -> 
+    atribParser >=> \cmd ->
+    (symbol "}") >=> \_ ->
+    (symbol "while") >=> \_ -> symbol "(" >=> \_ -> boolParser >=> \bool -> symbol ")" >=>
+    \_ ->  returnP (LoopPre bool cmd)
 
 -- getter
+-- boolVar = (many alphaNum) >=> \s -> returnP (boolOf (value store s)) >=> \b ->
+    
+-- MARK: - helpers
+boolExp::String -> BooleanExpression
+boolExp s = (fst ((parse boolParser s) !! 0) )
 
---sequence of expressions
+aritExp::String -> ArithmeticExpression
+aritExp s = (fst ((parse aritParser s) !! 0) )
 
--- ifs
-ifParser::Parser Expression
-ifParser = (symbol "if") >=> \_ -> boolParser >=> \bool -> 
+aritOrBool::Parser Value
+aritOrBool = 
+    (boolParser >=> \val -> returnP (Bool (calculateBool val))) +++
+    (aritParser >=> \val -> returnP (Integer (calculate val)))
 
--- loops
+expressionParser::Parser Expression
+expressionParser = preLoopParser +++ postLoopParser +++ ifParser +++ atribParser +++ seqParser
