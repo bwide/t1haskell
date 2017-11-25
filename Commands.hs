@@ -13,6 +13,7 @@ calculateBool (Or x y) = (calculateBool x) || (calculateBool y )
 calculateBool (Not x) = not (calculateBool x)
 calculateBool (x :>: y) = (calculate x) > (calculate y)
 
+--  add mem
 calculate::ArithmeticExpression -> Integer
 calculate (Number x) = x
 calculate (x :+: y) = (calculate x) + (calculate y)

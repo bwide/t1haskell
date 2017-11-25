@@ -12,6 +12,9 @@ boolParser =
     (symbol "True" >=> \_ -> returnP (Boolean True)) +++
     ((symbol "False" >=> \_ -> returnP (Boolean False)))
 
+parser123::Parser Int
+parser123 = symbol "x" >=> \_ -> parInteger >=> \var -> returnP (var) 
+
 -- do one of the above for numbers
 aritParser::Parser ArithmeticExpression
 aritParser = 
@@ -28,9 +31,9 @@ atribParser = (many alphaNum) >=>
 
 seqParser::Parser Expression
 seqParser = 
-    atribParser >=>
+    expressionParser >=>
     \cmd1 -> (symbol ";") >=>
-    \_ -> atribParser >=>
+    \_ -> expressionParser >=>
     \cmd2 -> returnP (Seq cmd1 cmd2)
 
 ifParser::Parser Expression
@@ -38,11 +41,11 @@ ifParser =
     (symbol "if") >=> \_ -> symbol "(" >=> \_ -> boolParser >=>
     \bool -> symbol ")" >=> \_ -> 
     (symbol "{") >=> \_ -> 
-    atribParser >=> \cmd ->
+    expressionParser >=> \cmd ->
     (symbol "}") >=> \_ -> 
     ((symbol "else") >=> \_ -> 
     (symbol "{") >=> \_ -> 
-    atribParser >=> \cmd1 ->
+    expressionParser >=> \cmd1 ->
     (symbol "}") >=> \_ -> (returnP (If bool cmd cmd1))) +++ 
     (symbol "" >=> \_ -> returnP (If bool cmd Nil))
 
@@ -52,13 +55,13 @@ preLoopParser =
     (symbol "while") >=> \_ -> symbol "(" >=> \_ -> boolParser >=>
     \bool -> symbol ")" >=> \_ -> 
     (symbol "{") >=> \_ -> 
-    atribParser >=> \cmd ->
+    expressionParser >=> \cmd ->
     (symbol "}") >=> \_ -> returnP (LoopPre bool cmd)
 
 postLoopParser::Parser Expression
 postLoopParser = 
     (symbol "do") >=> \_ -> (symbol "{") >=> \_ -> 
-    atribParser >=> \cmd ->
+    expressionParser >=> \cmd ->
     (symbol "}") >=> \_ ->
     (symbol "while") >=> \_ -> symbol "(" >=> \_ -> boolParser >=> \bool -> symbol ")" >=>
     \_ ->  returnP (LoopPre bool cmd)
@@ -79,4 +82,4 @@ aritOrBool =
     (aritParser >=> \val -> returnP (Integer (calculate val)))
 
 expressionParser::Parser Expression
-expressionParser = preLoopParser +++ postLoopParser +++ ifParser +++ atribParser +++ seqParser
+expressionParser = ifParser +++ preLoopParser +++ postLoopParser +++ atribParser +++ seqParser
