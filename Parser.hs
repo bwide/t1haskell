@@ -24,7 +24,9 @@ aritParser =
     (parInteger >=> \int -> returnP (Number (toInteger int))) -- or expressions
 
 atribParser::Parser Expression
-atribParser = (many alphaNum) >=>
+atribParser = 
+    symbol "let" >=> 
+    \_ -> (many alphaNum) >=>
      \var -> (symbol ":=") >=>
      \_ -> aritOrBool >=>
      \val -> returnP (Atrib var val)
