@@ -33,7 +33,8 @@ atribParser =
 
 seqParser::Parser Expression
 seqParser = 
-    expressionParser >=>
+    (symbol ";") >=>
+    \_ -> expressionParser >=>
     \cmd1 -> (symbol ";") >=>
     \_ -> expressionParser >=>
     \cmd2 -> returnP (Seq cmd1 cmd2)
@@ -84,4 +85,4 @@ aritOrBool =
     (aritParser >=> \val -> returnP (Integer (calculate val)))
 
 expressionParser::Parser Expression
-expressionParser = ifParser +++ preLoopParser +++ postLoopParser +++ atribParser +++ seqParser
+expressionParser = ifParser +++ preLoopParser +++ postLoopParser +++ seqParser +++ atribParser
